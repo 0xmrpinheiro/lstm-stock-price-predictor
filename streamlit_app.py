@@ -4,10 +4,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import sys
 import io
 import re
-import json
-import zipfile
-import tempfile
-import shutil
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -15,71 +11,12 @@ import yfinance as yf
 from datetime import datetime, timedelta
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-import tf_keras
-from tf_keras.models import load_model
+import tensorflow as tf
 from pathlib import Path
 import plotly.graph_objs as go
 
 # Valid ticker: 1-5 uppercase letters, optional class suffix (.A, -B)
 TICKER_RE = re.compile(r'^[A-Z]{1,5}(\.[A-Z]{1,2})?(-[A-Z]{1,2})?$')
-
-
-def _patch_keras_config(model_path: str) -> str:
-    """Patch a .keras zip to replace 'batch_shape' with 'batch_input_shape'
-    in InputLayer configs, returning the path to the patched file.
-    Returns the original path if no patching is needed."""
-    try:
-        with zipfile.ZipFile(model_path, 'r') as zf:
-            if 'config.json' not in zf.namelist():
-                return model_path
-            raw = zf.read('config.json')
-
-        # Quick check: does the config even contain batch_shape?
-        if b'"batch_shape"' not in raw:
-            return model_path
-
-        config = json.loads(raw)
-        patched = _patch_node(config)
-        if not patched:
-            return model_path
-
-        # Write patched zip to a temp file
-        tmp = tempfile.NamedTemporaryFile(suffix='.keras', delete=False)
-        tmp.close()
-        shutil.copy2(model_path, tmp.name)
-        with zipfile.ZipFile(tmp.name, 'w', zipfile.ZIP_DEFLATED) as zout:
-            with zipfile.ZipFile(model_path, 'r') as zin:
-                for item in zin.namelist():
-                    if item == 'config.json':
-                        zout.writestr(item, json.dumps(config))
-                    else:
-                        zout.writestr(item, zin.read(item))
-        return tmp.name
-    except Exception:
-        return model_path
-
-
-def _patch_node(node) -> bool:
-    """Recursively replace 'batch_shape' with 'batch_input_shape' in config dicts."""
-    changed = False
-    if isinstance(node, dict):
-        # Patch InputLayer configs
-        if 'batch_shape' in node and 'class_name' not in node:
-            node['batch_input_shape'] = node.pop('batch_shape')
-            changed = True
-        if node.get('class_name') == 'InputLayer' and isinstance(node.get('config'), dict):
-            cfg = node['config']
-            if 'batch_shape' in cfg:
-                cfg['batch_input_shape'] = cfg.pop('batch_shape')
-                changed = True
-        for v in node.values():
-            if _patch_node(v):
-                changed = True
-    elif isinstance(node, list):
-        for item in node:
-            if _patch_node(item):
-                changed = True
-    return changed
 
 
 # --- Caching helpers ---
@@ -90,12 +27,8 @@ def load_trained_model(model_path: str):
     sys.stdout = io.StringIO()
     sys.stderr = io.StringIO()
     try:
-        patched_path = _patch_keras_config(model_path)
-        model = load_model(patched_path)
-        # Clean up temp file if we created one
-        if patched_path != model_path:
-            os.unlink(patched_path)
-        return model
+        # Model was saved with tensorflow.keras (Keras 3), so load with Keras 3
+        return tf.keras.models.load_model(model_path)
     except Exception:
         return None
     finally:
