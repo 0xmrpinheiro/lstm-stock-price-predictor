@@ -33,9 +33,11 @@ class BackwardCompatibleInputLayer(tf_keras.layers.InputLayer):
 def load_trained_model(model_path: str):
     try:
         # Register the custom InputLayer to handle batch_shape compatibility
+        # The model was saved with tensorflow.keras but we're loading with tf_keras
         custom_objects = {
             'InputLayer': BackwardCompatibleInputLayer,
-            'tf_keras.layers.InputLayer': BackwardCompatibleInputLayer
+            'tf_keras.layers.InputLayer': BackwardCompatibleInputLayer,
+            'tensorflow.keras.layers.InputLayer': BackwardCompatibleInputLayer
         }
         return load_model(model_path, custom_objects=custom_objects)
     except Exception as e:

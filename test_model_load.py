@@ -36,9 +36,11 @@ def test_model_loading():
     # Test with custom objects
     try:
         # Register the custom InputLayer to handle batch_shape compatibility
+        # The model was saved with tensorflow.keras but we're loading with tf_keras
         custom_objects = {
             'InputLayer': BackwardCompatibleInputLayer,
-            'tf_keras.layers.InputLayer': BackwardCompatibleInputLayer
+            'tf_keras.layers.InputLayer': BackwardCompatibleInputLayer,
+            'tensorflow.keras.layers.InputLayer': BackwardCompatibleInputLayer
         }
         model = load_model(str(model_path), custom_objects=custom_objects)
         print("SUCCESS: Model loaded successfully with custom InputLayer!")
