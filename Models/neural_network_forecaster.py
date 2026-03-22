@@ -3,9 +3,9 @@ import pandas as pd
 import yfinance as yf
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM
-from tensorflow.keras.callbacks import EarlyStopping
+from tf_keras.models import Sequential
+from tf_keras.layers import Dense, Dropout, LSTM
+from tf_keras.callbacks import EarlyStopping
 import tensorflow as tf
 import plotly.graph_objs as go
 from pathlib import Path

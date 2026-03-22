@@ -1,6 +1,9 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+import sys
+import io
+import re
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -13,6 +16,9 @@ from tf_keras.models import load_model
 from tf_keras.layers import InputLayer
 from pathlib import Path
 import plotly.graph_objs as go
+
+# Valid ticker: 1-5 uppercase letters, optional class suffix (.A, -B)
+TICKER_RE = re.compile(r'^[A-Z]{1,5}(\.[A-Z]{1,2})?(-[A-Z]{1,2})?$')
 
 # --- Custom InputLayer for backward compatibility ---
 class BackwardCompatibleInputLayer(tf_keras.layers.InputLayer):
@@ -31,18 +37,22 @@ class BackwardCompatibleInputLayer(tf_keras.layers.InputLayer):
 # --- Caching helpers ---
 @st.cache_resource(show_spinner=False)
 def load_trained_model(model_path: str):
+    # Capture stdout/stderr to prevent TF error output from leaking
+    old_stdout, old_stderr = sys.stdout, sys.stderr
+    sys.stdout = io.StringIO()
+    sys.stderr = io.StringIO()
     try:
-        # Register the custom InputLayer to handle batch_shape compatibility
-        # The model was saved with tensorflow.keras but we're loading with tf_keras
         custom_objects = {
             'InputLayer': BackwardCompatibleInputLayer,
             'tf_keras.layers.InputLayer': BackwardCompatibleInputLayer,
             'tensorflow.keras.layers.InputLayer': BackwardCompatibleInputLayer
         }
         return load_model(model_path, custom_objects=custom_objects)
-    except Exception as e:
-        st.error(f"Error loading model: {e}")
+    except Exception:
         return None
+    finally:
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
 
 def _flatten_yf_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
     """Flatten MultiIndex columns returned by yfinance.
@@ -92,7 +102,7 @@ def _flatten_yf_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
 @st.cache_data(show_spinner=False, ttl=3600)
 def yf_download_robust(ticker: str, start, end):
     ticker = (ticker or "").strip().upper()
-    if not ticker:
+    if not ticker or not TICKER_RE.match(ticker):
         return pd.DataFrame()
 
     tries = [
@@ -224,6 +234,10 @@ def main():
     selected_model = st.sidebar.radio("Select Model", ("Neural Network",))
 
     if stock_symbol:
+        if not TICKER_RE.match(stock_symbol):
+            st.error("Invalid ticker symbol. Please enter 1-5 letters (e.g., MSFT, AAPL, BRK.B).")
+            return
+
         with st.spinner('Fetching stock data...'):
             stock_data = yf_download_robust(stock_symbol, start=start_date, end=end_date)
 
