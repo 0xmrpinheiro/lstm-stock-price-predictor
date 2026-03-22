@@ -15,7 +15,7 @@ from pathlib import Path
 import plotly.graph_objs as go
 
 # --- Custom InputLayer for backward compatibility ---
-class BackwardCompatibleInputLayer(InputLayer):
+class BackwardCompatibleInputLayer(tf_keras.layers.InputLayer):
     """Custom InputLayer that accepts the deprecated 'batch_shape' parameter
     for backward compatibility with models saved in older TensorFlow versions."""
     

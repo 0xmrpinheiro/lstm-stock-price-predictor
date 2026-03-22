@@ -10,7 +10,7 @@ from tf_keras.layers import InputLayer
 from pathlib import Path
 
 
-class BackwardCompatibleInputLayer(InputLayer):
+class BackwardCompatibleInputLayer(tf_keras.layers.InputLayer):
     """Custom InputLayer that accepts the deprecated 'batch_shape' parameter
     for backward compatibility with models saved in older TensorFlow versions."""
     
