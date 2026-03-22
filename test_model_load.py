@@ -35,7 +35,11 @@ def test_model_loading():
     
     # Test with custom objects
     try:
-        custom_objects = {'InputLayer': BackwardCompatibleInputLayer}
+        # Register the custom InputLayer to handle batch_shape compatibility
+        custom_objects = {
+            'InputLayer': BackwardCompatibleInputLayer,
+            'tf_keras.layers.InputLayer': BackwardCompatibleInputLayer
+        }
         model = load_model(str(model_path), custom_objects=custom_objects)
         print("SUCCESS: Model loaded successfully with custom InputLayer!")
         print(f"Model summary:")
