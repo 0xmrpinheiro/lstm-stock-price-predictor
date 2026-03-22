@@ -10,14 +10,30 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import tf_keras
 from tf_keras.models import load_model
+from tf_keras.layers import InputLayer
 from pathlib import Path
 import plotly.graph_objs as go
+
+# --- Custom InputLayer for backward compatibility ---
+class BackwardCompatibleInputLayer(InputLayer):
+    """Custom InputLayer that accepts the deprecated 'batch_shape' parameter
+    for backward compatibility with models saved in older TensorFlow versions."""
+    
+    def __init__(self, **kwargs):
+        # Convert batch_shape to input_shape if present
+        if 'batch_shape' in kwargs:
+            batch_shape = kwargs.pop('batch_shape')
+            # batch_shape is [None, timesteps, features], input_shape is (timesteps, features)
+            if batch_shape and len(batch_shape) > 1:
+                kwargs['input_shape'] = batch_shape[1:]
+        super().__init__(**kwargs)
 
 # --- Caching helpers ---
 @st.cache_resource(show_spinner=False)
 def load_trained_model(model_path: str):
     try:
-        return load_model(model_path)
+        custom_objects = {'InputLayer': BackwardCompatibleInputLayer}
+        return load_model(model_path, custom_objects=custom_objects)
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
