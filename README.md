@@ -8,7 +8,7 @@ Aeon Quant is a Streamlit application that predicts stock prices using an LSTM m
 
 ## Quick Links
 
-- **Live Demo**: <https://neuralstocks.streamlit.app/>
+- **Live Demo**: <https://lstm-stock-price-predictor.streamlit.app/>
 - **Last Model Training**: October 23, 2024
 
 ## Overview
