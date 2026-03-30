@@ -208,7 +208,7 @@ def perform_and_display_forecasting(stock_data, model, scaler):
     st.plotly_chart(fig4, width='stretch')
 
 def main():
-    st.sidebar.title('Aeon Stock Price Predict')
+    st.sidebar.title('LSTM Stock Price Predictor')
     stock_symbol = st.sidebar.text_input('Enter Stock Ticker Symbol (e.g., MSFT):').strip().upper()
     start_date = st.sidebar.date_input('Select Start Date:', datetime(2000, 1, 1))
     end_date = st.sidebar.date_input('Select End Date:', datetime.now())
