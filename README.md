@@ -40,8 +40,8 @@ Aeon Quant provides a simple UI for technical analysis and predictive modeling o
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/<your-org>/aeon-stock-price-predict.git
-   cd aeon-stock-price-predict
+   git clone https://github.com/0xmrpinheiro/lstm-stock-price-predictor.git
+   cd lstm-stock-price-predictor
    ```
 
 2. Install dependencies:
