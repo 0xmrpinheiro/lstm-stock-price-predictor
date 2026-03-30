@@ -1,8 +1,8 @@
-# Aeon Quant — Stock Price Prediction App
+# LSTM Stock Price Predictor
 
 > **Disclaimer**: Stock price prediction is inherently uncertain. This app is for educational purposes only and **not** investment advice.
 
-A Streamlit application that predicts stock prices using an LSTM model and visualizes stock data with interactive Plotly charts.
+Aeon Quant is a Streamlit application that predicts stock prices using an LSTM model and visualizes stock data with interactive Plotly charts.
 
 ![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)
 
@@ -13,7 +13,7 @@ A Streamlit application that predicts stock prices using an LSTM model and visua
 
 ## Overview
 
-Aeon Quant provides a simple UI for technical analysis and predictive modeling of stock prices. The app uses a TensorFlow LSTM to forecast future prices from historical data.
+LSTM Stock Price Predictor (Aeon Quant) provides a simple UI for technical analysis and predictive modeling of stock prices. The app uses a TensorFlow LSTM to forecast future prices from historical data.
 
 ## Features
 
